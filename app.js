@@ -17,6 +17,70 @@ function hidePopup() {
 
 let state = null;
 let undoStack = [];
+let supabaseClient = null;
+let receivingRemoteUpdate = false;
+
+const SYNC_ROW_ID = "klosterbingo2026";
+
+// ---- Live sync (Supabase) ----
+
+function initSync() {
+  if (
+    typeof SUPABASE_URL === "undefined" ||
+    !SUPABASE_URL ||
+    SUPABASE_URL.includes("PASTE")
+  ) {
+    console.warn("Supabase er ikke konfigurert - markering synkes kun lokalt.");
+    return;
+  }
+  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  supabaseClient
+    .from("bingo_marks")
+    .select("marks")
+    .eq("id", SYNC_ROW_ID)
+    .maybeSingle()
+    .then(({ data, error }) => {
+      if (error) {
+        console.warn("Klarte ikke å hente markering fra Supabase", error);
+        return;
+      }
+      if (data && data.marks) {
+        receivingRemoteUpdate = true;
+        state.marks = data.marks;
+        save();
+        if (state.phase === "boards") render();
+        receivingRemoteUpdate = false;
+      }
+    });
+
+  supabaseClient
+    .channel("bingo-marks-changes")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "bingo_marks", filter: `id=eq.${SYNC_ROW_ID}` },
+      (payload) => {
+        const newMarks = payload.new && payload.new.marks;
+        if (!newMarks) return;
+        receivingRemoteUpdate = true;
+        state.marks = newMarks;
+        save();
+        if (state.phase === "boards") render();
+        receivingRemoteUpdate = false;
+      }
+    )
+    .subscribe();
+}
+
+function pushMarks() {
+  if (!supabaseClient || receivingRemoteUpdate) return;
+  supabaseClient
+    .from("bingo_marks")
+    .upsert({ id: SYNC_ROW_ID, marks: state.marks, updated_at: new Date().toISOString() })
+    .then(({ error }) => {
+      if (error) console.warn("Klarte ikke å synke markering", error);
+    });
+}
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -171,6 +235,7 @@ function toggleMark(player, row, col) {
   state.marks[player][row][col] = !state.marks[player][row][col];
   save();
   render();
+  pushMarks();
 }
 
 // ---- Undo ----
@@ -376,3 +441,4 @@ document.getElementById("file-load").addEventListener("change", (e) => {
 
 load();
 render();
+initSync();
