@@ -27,7 +27,19 @@
       <h2>Klar til draft?</h2>
       <p>125 bingokort, 5 spillere: <strong id="player-list-preview"></strong></p>
       <p>Hver runde vises 5 tilfeldige kort. Dere velger ett hver, i rullerende rekkefølge, til alle 125 er fordelt (25 hver).</p>
-      <button id="btn-start-draft" class="btn-primary">Start draft</button>
+      <button id="btn-draw-order" class="btn-primary">Trekk rekkefølge</button>
+    </div>
+  </section>
+
+  <!-- DRAW ORDER SCREEN -->
+  <section id="screen-draw" class="screen hidden">
+    <div class="card-panel">
+      <h2>Rekkefølge runde 1</h2>
+      <ol id="draw-order-list" class="draw-order-list"></ol>
+      <div class="draw-actions">
+        <button id="btn-redraw" class="btn-small">Trekk på nytt</button>
+        <button id="btn-confirm-draft" class="btn-primary">Start draft</button>
+      </div>
     </div>
   </section>
 

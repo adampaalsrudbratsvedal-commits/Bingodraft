@@ -14,13 +14,15 @@ function shuffle(arr) {
 }
 
 function rotateOrder(round) {
-  const n = round % PLAYERS.length;
-  return PLAYERS.slice(n).concat(PLAYERS.slice(0, n));
+  const base = state.baseOrder && state.baseOrder.length ? state.baseOrder : PLAYERS;
+  const n = round % base.length;
+  return base.slice(n).concat(base.slice(0, n));
 }
 
 function freshState() {
   return {
     phase: "start",
+    baseOrder: [],
     deck: [],
     round: 0,
     suggestions: [],
@@ -55,11 +57,26 @@ function load() {
   state = freshState();
 }
 
+// ---- Order draw ----
+
+function drawOrder() {
+  undoStack = [];
+  state = freshState();
+  state.baseOrder = shuffle(PLAYERS);
+  state.phase = "draw";
+  save();
+  render();
+}
+
+function redrawOrder() {
+  state.baseOrder = shuffle(PLAYERS);
+  save();
+  render();
+}
+
 // ---- Draft ----
 
 function startDraft() {
-  undoStack = [];
-  state = freshState();
   state.deck = shuffle([...Array(CARDS.length).keys()]);
   state.round = 0;
   PLAYERS.forEach((p) => (state.assignments[p] = []));
@@ -185,6 +202,7 @@ function resetAll() {
 
 const screens = {
   start: document.getElementById("screen-start"),
+  draw: document.getElementById("screen-draw"),
   draft: document.getElementById("screen-draft"),
   placement: document.getElementById("screen-placement"),
   boards: document.getElementById("screen-boards"),
@@ -198,6 +216,16 @@ function showScreen(name) {
 
 function renderStart() {
   document.getElementById("player-list-preview").textContent = PLAYERS.join(", ");
+}
+
+function renderDraw() {
+  const list = document.getElementById("draw-order-list");
+  list.innerHTML = "";
+  state.baseOrder.forEach((player) => {
+    const li = document.createElement("li");
+    li.textContent = player;
+    list.appendChild(li);
+  });
 }
 
 function renderDraft() {
@@ -288,6 +316,7 @@ function render() {
   );
 
   if (state.phase === "start") renderStart();
+  else if (state.phase === "draw") renderDraw();
   else if (state.phase === "draft") renderDraft();
   else if (state.phase === "placement") renderPlacement();
   else if (state.phase === "boards") renderBoards();
@@ -295,7 +324,9 @@ function render() {
 
 // ---- Wiring ----
 
-document.getElementById("btn-start-draft").addEventListener("click", startDraft);
+document.getElementById("btn-draw-order").addEventListener("click", drawOrder);
+document.getElementById("btn-redraw").addEventListener("click", redrawOrder);
+document.getElementById("btn-confirm-draft").addEventListener("click", startDraft);
 document.getElementById("btn-undo").addEventListener("click", undo);
 document.getElementById("btn-save").addEventListener("click", exportToFile);
 document.getElementById("btn-reset").addEventListener("click", resetAll);
