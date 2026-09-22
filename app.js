@@ -29,8 +29,8 @@ function freshState() {
     pickOrder: [],
     pickIndex: 0,
     assignments: {},
-    placementPlayerPos: 0,
-    placementCardPos: 0,
+    placementRound: 0,
+    placementPickIndex: 0,
     boards: {},
     marks: {},
   };
@@ -114,8 +114,8 @@ function pickCard(cardIdx) {
 
 function initPlacement() {
   state.phase = "placement";
-  state.placementPlayerPos = 0;
-  state.placementCardPos = 0;
+  state.placementRound = 0;
+  state.placementPickIndex = 0;
   state.boards = {};
   state.marks = {};
   PLAYERS.forEach((p) => {
@@ -125,16 +125,17 @@ function initPlacement() {
 }
 
 function placeCard(row, col) {
-  const player = PLAYERS[state.placementPlayerPos];
+  const order = rotateOrder(state.placementRound);
+  const player = order[state.placementPickIndex];
   if (state.boards[player][row][col] !== null) return;
   undoStack.push(snapshot());
-  const cardIdx = state.assignments[player][state.placementCardPos];
+  const cardIdx = state.assignments[player][state.placementRound];
   state.boards[player][row][col] = cardIdx;
-  state.placementCardPos++;
-  if (state.placementCardPos >= state.assignments[player].length) {
-    state.placementPlayerPos++;
-    state.placementCardPos = 0;
-    if (state.placementPlayerPos >= PLAYERS.length) {
+  state.placementPickIndex++;
+  if (state.placementPickIndex >= PLAYERS.length) {
+    state.placementRound++;
+    state.placementPickIndex = 0;
+    if (state.placementRound >= Math.ceil(CARDS.length / PLAYERS.length)) {
       state.phase = "boards";
     }
   }
@@ -257,11 +258,26 @@ function renderDraft() {
 }
 
 function renderPlacement() {
-  const player = PLAYERS[state.placementPlayerPos];
-  document.getElementById("placement-player-name").textContent = player;
-  document.getElementById("placement-progress").textContent =
-    `Kort ${state.placementCardPos + 1} / ${state.assignments[player].length}`;
-  const cardIdx = state.assignments[player][state.placementCardPos];
+  const order = rotateOrder(state.placementRound);
+  const player = order[state.placementPickIndex];
+  const totalRounds = Math.ceil(CARDS.length / PLAYERS.length);
+
+  document.getElementById("placement-round-label").textContent =
+    `Runde ${state.placementRound + 1} / ${totalRounds}`;
+  document.getElementById("placement-current-picker").textContent = player;
+
+  const orderEl = document.getElementById("placement-pick-order");
+  orderEl.innerHTML = "";
+  order.forEach((p, i) => {
+    const pill = document.createElement("span");
+    pill.className = "pill";
+    if (i === state.placementPickIndex) pill.classList.add("active");
+    if (i < state.placementPickIndex) pill.classList.add("done");
+    pill.textContent = p;
+    orderEl.appendChild(pill);
+  });
+
+  const cardIdx = state.assignments[player][state.placementRound];
   document.getElementById("placement-current-card").textContent = CARDS[cardIdx];
 
   const boardEl = document.getElementById("placement-board");
