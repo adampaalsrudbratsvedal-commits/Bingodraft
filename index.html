@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klosterbingo 2026</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Klosterbingo 2026</h1>
+  <div class="header-actions">
+    <button id="btn-undo" class="btn-small hidden">Angre siste valg</button>
+    <button id="btn-save" class="btn-small">Lagre til fil</button>
+    <label class="btn-small file-label">Last inn
+      <input type="file" id="file-load" accept="application/json" hidden>
+    </label>
+    <button id="btn-reset" class="btn-small btn-danger">Nullstill alt</button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- START SCREEN -->
+  <section id="screen-start" class="screen">
+    <div class="card-panel">
+      <h2>Klar til draft?</h2>
+      <p>125 bingokort, 5 spillere: <strong id="player-list-preview"></strong></p>
+      <p>Hver runde vises 5 tilfeldige kort. Dere velger ett hver, i rullerende rekkefølge, til alle 125 er fordelt (25 hver).</p>
+      <button id="btn-start-draft" class="btn-primary">Start draft</button>
+    </div>
+  </section>
+
+  <!-- DRAFT SCREEN -->
+  <section id="screen-draft" class="screen hidden">
+    <div class="draft-status">
+      <span id="round-label">Runde 1 / 25</span>
+      <span id="current-picker" class="current-picker"></span>
+    </div>
+    <div class="pick-order" id="pick-order"></div>
+    <h2 class="suggestions-title">Velg ett kort:</h2>
+    <div id="suggestions" class="suggestions-grid"></div>
+  </section>
+
+  <!-- PLACEMENT SCREEN -->
+  <section id="screen-placement" class="screen hidden">
+    <div class="placement-status">
+      <h2 id="placement-player-name"></h2>
+      <span id="placement-progress"></span>
+    </div>
+    <div class="current-card" id="placement-current-card"></div>
+    <p class="hint">Klikk en ledig rute på brettet for å plassere kortet</p>
+    <div id="placement-board" class="board board-placement"></div>
+  </section>
+
+  <!-- BOARDS / PLAY SCREEN -->
+  <section id="screen-boards" class="screen hidden">
+    <h2>Ferdige brett</h2>
+    <p class="hint">Klikk på ruter for å markere av under spill</p>
+    <div id="boards-container" class="boards-container"></div>
+  </section>
+
+</main>
+
+<script src="cards.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
