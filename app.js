@@ -1,6 +1,20 @@
 const PLAYERS = ["Jonathan", "Adam Pus", "Leon", "0lav", "Torjews"];
 const STORAGE_KEY = "klosterbingo-2026-state";
 
+const POPUP_TRIGGERS = {
+  "Odin til å Knulle": "OUUUFFF, ville ikke valgt den",
+  "Anar knuller 07": "En gang til?",
+};
+
+function showPopup(message) {
+  document.getElementById("popup-message").textContent = message;
+  document.getElementById("popup-overlay").classList.remove("hidden");
+}
+
+function hidePopup() {
+  document.getElementById("popup-overlay").classList.add("hidden");
+}
+
 let state = null;
 let undoStack = [];
 
@@ -108,6 +122,9 @@ function pickCard(cardIdx) {
   }
   save();
   render();
+
+  const trigger = POPUP_TRIGGERS[CARDS[cardIdx]];
+  if (trigger) showPopup(trigger);
 }
 
 // ---- Placement ----
@@ -340,6 +357,7 @@ function render() {
 
 // ---- Wiring ----
 
+document.getElementById("popup-close").addEventListener("click", hidePopup);
 document.getElementById("btn-draw-order").addEventListener("click", drawOrder);
 document.getElementById("btn-redraw").addEventListener("click", redrawOrder);
 document.getElementById("btn-confirm-draft").addEventListener("click", startDraft);
