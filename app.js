@@ -384,15 +384,45 @@ function renderPlacement() {
   }
 }
 
+function countMarked(player) {
+  return state.marks[player].reduce((sum, row) => sum + row.filter(Boolean).length, 0);
+}
+
+function countBingos(player) {
+  const b = state.marks[player];
+  let count = 0;
+  for (let r = 0; r < 5; r++) {
+    if (b[r].every(Boolean)) count++;
+  }
+  for (let c = 0; c < 5; c++) {
+    if (b.every((row) => row[c])) count++;
+  }
+  if ([0, 1, 2, 3, 4].every((i) => b[i][i])) count++;
+  if ([0, 1, 2, 3, 4].every((i) => b[i][4 - i])) count++;
+  return count;
+}
+
 function renderBoards() {
   const container = document.getElementById("boards-container");
   container.innerHTML = "";
-  PLAYERS.forEach((player) => {
+
+  const sortedPlayers = PLAYERS.slice().sort((a, b) => countMarked(b) - countMarked(a));
+
+  sortedPlayers.forEach((player) => {
     const block = document.createElement("div");
     block.className = "player-board-block";
+
     const h3 = document.createElement("h3");
     h3.textContent = player;
     block.appendChild(h3);
+
+    const bingoCount = countBingos(player);
+    if (bingoCount > 0) {
+      const bingoLabel = document.createElement("div");
+      bingoLabel.className = "bingo-label";
+      bingoLabel.textContent = Array(bingoCount).fill("BINGO").join(" ");
+      block.appendChild(bingoLabel);
+    }
 
     const boardEl = document.createElement("div");
     boardEl.className = "board board-play";

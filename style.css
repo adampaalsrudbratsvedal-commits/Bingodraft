@@ -270,9 +270,25 @@ button {
   padding: 16px;
 }
 .player-board-block h3 {
-  margin: 0 0 12px;
+  margin: 0 0 4px;
   color: var(--accent);
   text-align: center;
+}
+
+.bingo-label {
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  color: #ffd54a;
+  text-shadow: 0 0 12px rgba(255, 213, 74, 0.6);
+  margin-bottom: 12px;
+  animation: bingo-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes bingo-pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
 }
 
 .board-play .cell {
