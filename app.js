@@ -68,6 +68,11 @@ function load() {
       console.warn("Kunne ikke lese lagret state", e);
     }
   }
+  if (typeof SAVED_RESULT !== "undefined") {
+    state = JSON.parse(JSON.stringify(SAVED_RESULT));
+    save();
+    return;
+  }
   state = freshState();
 }
 
